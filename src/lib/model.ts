@@ -1,5 +1,6 @@
 import _ from "lodash";
 import {ISTProps, IColumn, IRecord} from "./tools";
+import exportXlxs from "./export";
 
 export type IColumnMD = IColumn & {
     $$id: number
@@ -21,6 +22,8 @@ export class TableModel {
     private _allColumns: IColumnMD[] = [];
     private _displayColumns: number[] = [];
 
+    private _selectedRows: number[] = [];
+
     constructor(props: ISTProps, update?: () => void) {
         const { data, columns } = props;
         data?.forEach((e, idx) => {
@@ -34,7 +37,10 @@ export class TableModel {
         this._displayColumns = this._allColumns.map(e => e.$$id);
         this._data = data || [] as any;
         this._maxId = this._data.length;
-        update && (this._update = _.debounce(update, 1000 / 30));
+        if(update) {
+            this._update = update;
+            this._debounceUpdate = _.debounce(update, 1000 / 30);
+        }
     }
 
     get displayColumns() {
@@ -55,7 +61,7 @@ export class TableModel {
         idx < 0 ?
             this._displayColumns.push(item): 
             this._displayColumns.splice(idx, 1);
-        this._update();
+        this._debounceUpdate();
     }
 
     public edit(record: IRecordMD, dataIndex: string, val: any) {
@@ -74,7 +80,7 @@ export class TableModel {
             _.set(nRec, dataIndex, val);
             this._changed.push(nRec);
         }
-        this._update();
+        this._debounceUpdate();
     }
 
     public delete(record: IRecordMD) {
@@ -89,7 +95,17 @@ export class TableModel {
             nRec.$$mode = "delete";
             this._changed.push(nRec);
         }
-        this._update();
+        this._selectedRows.includes(record.$$id) && _.pull(this._selectedRows, record.$$id);
+        this._debounceUpdate();
+    }
+
+    public deleteSelection() {
+        const data = this.mergedData;
+        const selected = this.selectedRows;
+        selected.forEach(id => {
+            const record = data.find(e => e.$$id === id);
+            record && this.delete(record);
+        });
     }
 
     public add() {
@@ -99,7 +115,7 @@ export class TableModel {
         };
         this._changed.push(nRec);
         this._maxId ++;
-        this._update();
+        this._debounceUpdate();
     }
 
     public copy(record: IRecordMD) {
@@ -110,7 +126,7 @@ export class TableModel {
         });
         this._changed.push(nRec);
         this._maxId ++;
-        this._update();
+        this._debounceUpdate();
     }
 
     public get changedInfo() {
@@ -153,6 +169,34 @@ export class TableModel {
         return false;
     }
 
+    get selectedRows() {
+        return [...this._selectedRows];
+    }
+
+    public setSelectedRows(rows: number[]) {
+        this._selectedRows = rows || [];
+        this._debounceUpdate();
+    }
+
     private _update() {}
+    private _debounceUpdate() {}
+
+    public exportXlsx(name?: string) {
+        const columns = this.allColumns.filter(e => e.dataIndex);
+        const data = this.mergedData;
+        const initColumn = columns.map(e => ({
+            title: e.title,
+            dataIndex: e.dataIndex,
+            key: e.dataIndex,
+        }));
+        const attendanceInfoList = data.map(e => {
+            return initColumn.reduce((iv, ee: any) => {
+                return Object.assign(iv, {
+                    [ee.dataIndex]: _.get(e, ee.dataIndex),
+                });
+            }, {})
+        });
+        exportXlxs(initColumn, attendanceInfoList, name)
+    }
 
 }

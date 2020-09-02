@@ -1,9 +1,8 @@
 import React from "react";
 import {Table, Button, Dropdown, Menu, Divider} from "antd";
-import {DisplayColumns} from "./display-columns";
 import { EditCell } from './edit-cell';
 import _ from "lodash";
-import {EditOutlined} from "@ant-design/icons";
+import {EditOutlined, DownOutlined} from "@ant-design/icons";
 import {StatusBar} from "./status";
 import styled from "styled-components";
 import {ISTProps, TableContext, IColumnOp} from "./tools";
@@ -73,9 +72,9 @@ export class ST extends React.Component<ISTProps> {
                                     </OpMenu>
                                 )
                                 return (
-                                    <Dropdown key={idx} overlay={overlay} arrow placement="bottomCenter">
+                                    <Dropdown key={idx} overlay={overlay} placement="bottomCenter">
                                         <Button type="link">
-                                            {button.text}
+                                            {button.text}<DownOutlined />
                                         </Button>
                                     </Dropdown>
                                 )
@@ -94,13 +93,20 @@ export class ST extends React.Component<ISTProps> {
 
         return (
             <TableContext.Provider value={tableModel}>
-                <DisplayColumns />
                 <StatusBar />
                 <Table
                     {...this.props}
                     dataSource={mergedData}
                     rowKey="$$id"
                     columns={columns}
+                    rowSelection={{
+                        ...this.props.rowSelection,
+                        selectedRowKeys: tableModel.selectedRows,
+                        onChange: (selectedRowKeys: number[]) => {
+                            tableModel.setSelectedRows(selectedRowKeys);
+                            this.props?.rowSelection?.onChange(selectedRowKeys);
+                        }
+                    } as any}
                 />
             </TableContext.Provider>
         )
@@ -122,5 +128,8 @@ const OpSpan = styled.span`
 `
 
 const OpMenu = styled(Menu) `
-    min-width: 100px;
+    min-width: 80px;
+    .ant-dropdown-menu-item {
+        text-align: center;
+    }
 `
