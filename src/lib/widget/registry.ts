@@ -1,17 +1,33 @@
 import { InputWidget } from './input';
 import { SelectWidget } from './select';
+import { NumberWidget } from './number';
+import {IColumnEdit} from '../tools';
+import {IRecordMD, TableModel} from '../model';
 
+export interface IWidgetProps {
+    ui: IColumnEdit;
+    dataIndex: string;
+    value: any;
+    record: IRecordMD;
+    tableModel: TableModel;
+}
+
+type IWidget = React.ComponentType<any>; 
+
+interface WidgetMap {
+    [key: string]: IWidget;
+}
 
 class WidgetRegistry {
 
-    private _map: any = [];
-    private _default: any;
+    private _map: WidgetMap = [] as any;
+    private _default!: IWidget;
 
-    public registry(name: string, widget: any) {
+    public registry(name: string, widget: IWidget) {
         this._map[name] = widget;
     }
 
-    public setDefault(widget: any) {
+    public setDefault(widget: IWidget) {
         this._default = widget;
     }
 
@@ -25,4 +41,5 @@ export const widgetRegistry = new WidgetRegistry();
 
 widgetRegistry.registry("input", InputWidget);
 widgetRegistry.registry("select", SelectWidget);
+widgetRegistry.registry("number", NumberWidget);
 widgetRegistry.setDefault(InputWidget);

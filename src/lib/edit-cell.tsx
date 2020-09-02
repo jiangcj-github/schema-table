@@ -1,17 +1,28 @@
-import React from "react";
-import {TableContext} from "./st";
+import React, {ReactNode} from "react";
 import styled from "styled-components";
 import cln from "classnames";
-import {EditOutlined} from "@ant-design/icons"
 import { widgetRegistry } from './widget/registry';
+import _ from "lodash";
+import {IColumnMD, IRecordMD} from "./model";
+import { TableContext } from './tools';
 
+interface IEditCellProps {
+    col: IColumnMD;
+    record: IRecordMD;
+    children: ReactNode;
+}
 
-export const EditCell = (props: any) => {
+export const EditCell = (props: IEditCellProps) => {
 
     const tableModel = React.useContext(TableContext);
-    const { col } = props;
+    const { col, record } = props;
 
     const [inEdit, setInEdit] = React.useState(false);
+
+    React.useEffect(() => {
+        setInEdit(false);
+        document.body.style.removeProperty("overflow");
+    }, [tableModel.editId])
 
     const onFocus = () => {
         setInEdit(true);
@@ -23,22 +34,25 @@ export const EditCell = (props: any) => {
         document.body.style.removeProperty("overflow");
     }
 
-   
-    const Widget = widgetRegistry.get(col.editable.widget);
+    const Widget = widgetRegistry.get(col.editable?.widget || "");
 
-    return <Div>
-        <div className={cln({"cell-mask": true, "active": inEdit})} onClick={clickMask} />
-        <div className="cell" onClick={onFocus} >
-            {inEdit ? 
-                <Widget ui={col.editable} /> : 
-                <>
-                    {props.children}&nbsp;
-                    <EditOutlined />
-                </>}
-        </div>
-        
-    </Div>
-    
+    return (
+        <Div>
+            <div className={cln({"cell-mask": true, "active": inEdit})} onClick={clickMask} />
+            <div className="cell" onClick={onFocus} >
+                {inEdit ? 
+                    <Widget 
+                        ui={col.editable} 
+                        dataIndex={col.dataIndex} 
+                        value={_.get(record, col.dataIndex as string)}
+                        record={record} 
+                        tableModel={tableModel} /> : 
+                    <>
+                        {props.children}
+                    </>}
+            </div>
+        </Div>
+    )
 }
 
 const Div = styled.div`

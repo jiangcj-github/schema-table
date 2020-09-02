@@ -1,18 +1,17 @@
-import React, {ChangeEvent} from "react";
-import {Input} from "antd";
+import React from "react";
+import {InputNumber} from "antd";
 import {IWidgetProps} from "./registry";
 
-export const InputWidget = (props: IWidgetProps) => {
+export const NumberWidget = (props: IWidgetProps) => {
 
     const {ui, record, dataIndex, tableModel, value} = props;
    
-    const onChange = (e: ChangeEvent) => {
-        const value = (e.target as any).value;
-        tableModel.edit(record, dataIndex, value);
+    const onChange = (val?: number | string) => {
+        tableModel.edit(record, dataIndex, val);
     }
 
     return (
-        <Input 
+        <InputNumber 
             className="cell-input"
             placeholder={ui.placeholder}
             value={value}
@@ -20,4 +19,5 @@ export const InputWidget = (props: IWidgetProps) => {
             autoFocus={true}
         />
     )
+    
 }

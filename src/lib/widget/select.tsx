@@ -1,18 +1,27 @@
 import React from "react";
 import {Select} from "antd";
+import {IWidgetProps} from "./registry";
 
-export const SelectWidget = (props: any) => {
+export const SelectWidget = (props: IWidgetProps) => {
 
-    const { ui } = props;
+    const {ui, record, dataIndex, tableModel, value} = props;
+    
+    const onChange = (val: any) => {
+        tableModel.edit(record, dataIndex, val);
+    }
 
     const options = ui?.options ?? [];
-    options.map((e: any, idx: number) => e.key = idx);
+    options.forEach((e: any, idx: number) => {
+        e.key = idx;
+    });
 
     return (
         <Select 
+            value={value}
+            onChange={onChange}
             options={options}
             className="cell-input"
-            placeholder="请选择"
+            placeholder={ui.placeholder}
         />
     )
 
