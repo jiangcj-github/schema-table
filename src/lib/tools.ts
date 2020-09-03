@@ -1,11 +1,11 @@
-import React from "react";
+import React, {ReactNode} from "react";
 import {ColumnGroupType, ColumnType} from "antd/lib/table";
 import {TableModel, IRecordMD} from "./model";
-import {TableRowSelection} from "antd/lib/table/interface";
+import {TableRowSelection, TablePaginationConfig} from "antd/lib/table/interface";
 
 export interface IColumnOp {
     text?: string;
-    icon?: string;
+    icon?: ReactNode;
     type?: "divider";
     tooltip?: string;
     disabled?: (record: IRecordMD) => boolean;
@@ -39,17 +39,22 @@ export interface IStatusBar {
     includeColumns?: string[];
     excludeColumns?: string[];
     hideAdjustColumns?: boolean;
+    buttons?: {
+        text?: string;
+        icon?: ReactNode;
+        onClick?: () => void;
+    }[];
 }
-
-export type STSelection =  Omit<TableRowSelection<any>, "selectedRowKeys">;
 
 export interface ISTProps {
     data?: IRecord[];
     columns?: IColumn[];
     statusBar?: IStatusBar;
-    rowSelection?: STSelection;
+    rowSelection?: TableRowSelection<any>;
     hideRowSelection?: boolean;
     hideStatusBar?: boolean;
+    hidePagination?: boolean;
+    pagination?: TablePaginationConfig;
     [key: string]: any;
 }
 

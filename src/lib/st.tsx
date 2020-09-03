@@ -31,6 +31,10 @@ export class ST extends React.Component<ISTProps> {
         return nextState;
     }
 
+    get tableModel() {
+        return this.state.model;
+    }
+
     private renderEditable = (col: IColumnMD, _1: any, record: IRecordMD, _2: number) => {
         const { model: tableModel } = this.state;
         const dataIndex = col.dataIndex as string;
@@ -61,6 +65,7 @@ export class ST extends React.Component<ISTProps> {
                         <Menu.Item 
                             key={idx} 
                             disabled={disabled}
+                            icon={child.icon ?? <ICON.SettingOutlined />}
                             onClick={() => child.onClick?.call(tableModel, record)}>
                             {child.text}
                         </Menu.Item>
@@ -88,7 +93,7 @@ export class ST extends React.Component<ISTProps> {
                         overlay={this.renderButtonsOverlay(button.children, record)} 
                         disabled={disabled} 
                         placement="bottomCenter">
-                        <Button type="link" >
+                        <Button type="link">
                             {button.text}<ICON.DownOutlined />
                         </Button>
                     </Dropdown>
@@ -99,6 +104,7 @@ export class ST extends React.Component<ISTProps> {
                     key={idx} 
                     disabled={disabled} 
                     onClick={() => button.onClick?.call(tableModel, record)} 
+                    icon={button.icon ?? <ICON.SettingOutlined />}
                     type="link">
                     {button.text}
                 </Button>
@@ -134,27 +140,54 @@ export class ST extends React.Component<ISTProps> {
             }
             return nCol;
         });
-
         const rowSelectionMap = this.props.hideRowSelection === true ? {} : {
             rowSelection: {
-                ...this.props.rowSelection,
                 selectedRowKeys: tableModel.selectedRows,
+                ...this.props.rowSelection,
                 onChange: (selectedRowKeys: number[], selectedRows: IRecord[]) => {
-                    tableModel.setSelectedRows(selectedRowKeys);
+                    if(!this.props.rowSelection?.hasOwnProperty("selectedRowKeys")) {
+                        tableModel.setSelectedRows(selectedRowKeys);
+                    }
                     this.props?.rowSelection?.onChange?.call(tableModel, selectedRowKeys, selectedRows);
+                }
+            }
+        }
+        const paginationMap = this.props.hidePagination === true ? {pagination: false} : {
+            pagination: {
+                showLessItems: true,
+                showQuickJumper: true,
+                showSizeChanger: true,
+                showTotal: (total: number) => <span>共{total}条</span>,
+                ...tableModel.pageInfo,
+                ...this.props.pagination,
+                onChange: (current: number) => {
+                    if(!this.props.pagination?.hasOwnProperty("current")) {
+                        tableModel.setPage(current);
+                    }
+                    this.props.pagination?.onChange?.call(tableModel, current);
+                },
+                onShowSizeChange: (current: number, size: number) => {
+                    if(!this.props.pagination?.hasOwnProperty("current")) {
+                        tableModel.setPage(current);
+                    }
+                    if(!this.props.pagination?.hasOwnProperty("pageSize")) {
+                        tableModel.setPageSize(size);
+                    }
+                    this.props.pagination?.onShowSizeChange?.call(tableModel, current, size);
                 }
             }
         }
 
         return (
             <TableContext.Provider value={tableModel}>
-                {!this.props.hideStatusBar && <StatusBar {...this.props.StatusBar} />}
+                {!this.props.hideStatusBar && <StatusBar {...this.props.statusBar} />}
                 <StyleTable
                     {...this.props}
                     showSorterTooltip={false}
                     dataSource={mergedData}
                     rowKey="$$id"
                     columns={dealColumns}
+                    {...paginationMap}
                     {...rowSelectionMap as any}
                 />
             </TableContext.Provider>
@@ -198,5 +231,7 @@ const StyleTable = styled(Table)`
     .ant-table-column-sorter-up.active, .ant-table-column-sorter-down.active, .ant-table-filter-trigger.active {
         color: #000;
     }
-
+    .ant-btn > .anticon + span {
+        margin-left: 4px;
+    }
 `

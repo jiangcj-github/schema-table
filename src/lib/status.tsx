@@ -6,12 +6,9 @@ import {DisplayColumns} from "./display-columns";
 import * as ICON from "@ant-design/icons";
 
 export const StatusBar = (props: IStatusBar) => {
-
     const tableModel = React.useContext(TableContext);
-
     const {adds, modifies, dels} = tableModel.changedInfo;
     const hasChanged = !!adds.length || !!modifies.length || !!dels.length;
-
     const { selectedRows } = tableModel;
     const hasSelected = !!selectedRows.length;
     
@@ -47,12 +44,17 @@ export const StatusBar = (props: IStatusBar) => {
     }
 
     return <Div>
-        <DisplayColumns />
+        {!props.hideAdjustColumns && <DisplayColumns />}
         <div>
             <Divider type="vertical" orientation="center" />
             <Button type="link" onClick={onAdd} className="op-btn" icon={<ICON.PlusCircleOutlined />}>添加</Button>
             <Divider type="vertical" orientation="center" />
             <Button type="link" onClick={onExport} className="op-btn" icon={<ICON.ExportOutlined />}>导出</Button>
+            {props.buttons?.map((e, idx) => <React.Fragment key={idx}>
+                <Divider type="vertical" orientation="center" />
+                <Button type="link" onClick={() => e.onClick?.call(tableModel)} 
+                    icon={e.icon ?? <ICON.SettingOutlined />} className="op-btn">{e.text}</Button>
+            </React.Fragment>)}
         </div>
         {hasSelected && 
             <div className="selection">

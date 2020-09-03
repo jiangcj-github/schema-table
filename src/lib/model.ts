@@ -24,8 +24,12 @@ export class TableModel {
 
     private _selectedRows: number[] = [];
 
+    private _page = 1;
+    private _pageSize = 10;
+    private _total = 0;
+
     constructor(props: ISTProps, update?: () => void) {
-        const { data, columns, statusBar } = props;
+        const { data, columns, statusBar, pagination } = props;
         const includeColumns = statusBar?.includeColumns;
         const excludeColumns = statusBar?.excludeColumns;
 
@@ -57,6 +61,9 @@ export class TableModel {
             this._update = update;
             this._debounceUpdate = _.debounce(update, 1000 / 30);
         }
+        this._total = data?.length ?? 0;
+        this._pageSize = pagination?.defaultPageSize ?? 10;
+        this._page = pagination?.defaultCurrent ?? 1;
     }
 
     get displayColumns() {
@@ -65,11 +72,6 @@ export class TableModel {
 
     get allColumns() {
         return this._allColumns;
-    }
-
-    public setDisplayColumns(cols: number[]) {
-        this._displayColumns = cols;
-        this._update();
     }
 
     public toggleDisplay(item: number) {
@@ -112,6 +114,8 @@ export class TableModel {
             this._changed.push(nRec);
         }
         this._selectedRows.includes(record.$$id) && _.pull(this._selectedRows, record.$$id);
+        this._total --;
+        this._recalculatePage();
         this._debounceUpdate();
     }
 
@@ -129,8 +133,10 @@ export class TableModel {
             $$id: this._maxId + 1,
             $$mode: "add"
         };
-        this._changed.push(nRec);
+        this._changed.unshift(nRec);
         this._maxId ++;
+        this._total ++;
+        this._page = 1;
         this._update();
     }
 
@@ -140,8 +146,10 @@ export class TableModel {
             $$mode: "add",
             $$origin: undefined,
         });
-        this._changed.push(nRec);
+        this._changed.unshift(nRec);
         this._maxId ++;
+        this._total ++;
+        this._page = 1;
         this._update();
     }
 
@@ -168,6 +176,8 @@ export class TableModel {
     public resetEdit() {
         this._changed = [];
         this._editId = Math.random();
+        this._page = 1;
+        this._total = this._data.length;
         this._update();
     }
 
@@ -219,6 +229,37 @@ export class TableModel {
             }, {})
         });
         exportXlxs(initColumn, attendanceInfoList, name)
+    }
+
+    public get pageInfo() {
+        return {
+            current: this._page,
+            pageSize: this._pageSize,
+            total: this._total
+        }
+    }
+
+    public setPage(page: number) {
+        if(page > 0) {
+            this._page = page;
+        }
+        else if(page < 0) {
+            const maxPage = Math.ceil(this._total / this._pageSize);
+            this._page = maxPage + page + 1;
+        }
+        this._update();
+    }
+
+    public setPageSize(pageSize: number) {
+        if(pageSize > 0) {
+            this._pageSize = pageSize;
+        }
+        this._update();
+    }
+
+    private _recalculatePage() {
+        this._total <= (this._page - 1) * this._pageSize && this._page --;
+        this._page <= 1 && (this._page = 1);
     }
 
 }
