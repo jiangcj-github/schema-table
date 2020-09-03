@@ -1,11 +1,11 @@
 import React from "react"
 import {Button, Divider} from "antd";
 import styled from "styled-components";
-import {TableContext} from "./tools";
+import {TableContext, IStatusBar} from "./tools";
 import {DisplayColumns} from "./display-columns";
-import {DeleteOutlined, ExportOutlined, CloudUploadOutlined, PlusCircleOutlined, RedoOutlined} from "@ant-design/icons";
+import * as ICON from "@ant-design/icons";
 
-export const StatusBar = () => {
+export const StatusBar = (props: IStatusBar) => {
 
     const tableModel = React.useContext(TableContext);
 
@@ -16,18 +16,33 @@ export const StatusBar = () => {
     const hasSelected = !!selectedRows.length;
     
     const onSave = () => {
-        console.log(adds, modifies, dels);
+        if(props.onSave?.call(tableModel, tableModel.changed) === false) {
+            return;
+        }
+        console.log(tableModel.changed);
     }
     const onCancel = () => {
+        if(props.onCancel?.call(tableModel, tableModel.changed) === false) {
+            return;
+        }
         tableModel.resetEdit();
     }
     const onAdd = () => {
+        if(props.onAdd?.call(tableModel) === false) {
+            return;
+        }
         tableModel.add();
     }
     const onExport = () => {
+        if(props.onExport?.call(tableModel, tableModel.mergedData) === false) {
+            return;
+        }
         tableModel.exportXlsx("下载");
     }
     const onDeleteSelection = () => {
+        if(props.onDelete?.call(tableModel, tableModel.selectedRecords) === false) {
+            return;
+        }
         tableModel.deleteSelection();
     }
 
@@ -35,25 +50,25 @@ export const StatusBar = () => {
         <DisplayColumns />
         <div>
             <Divider type="vertical" orientation="center" />
-            <Button type="link" onClick={onAdd} className="op-btn" icon={<PlusCircleOutlined />}>添加</Button>
+            <Button type="link" onClick={onAdd} className="op-btn" icon={<ICON.PlusCircleOutlined />}>添加</Button>
             <Divider type="vertical" orientation="center" />
-            <Button type="link" onClick={onExport} className="op-btn" icon={<ExportOutlined />}>导出</Button>
+            <Button type="link" onClick={onExport} className="op-btn" icon={<ICON.ExportOutlined />}>导出</Button>
         </div>
         {hasSelected && 
             <div className="selection">
                 <Divider type="vertical" orientation="center" />
                 <span className="sel-tip">已选中{selectedRows.length}项</span>
-                <Button type="link" onClick={onDeleteSelection} icon={<DeleteOutlined />}>删除</Button>
+                <Button type="link" onClick={onDeleteSelection} icon={<ICON.DeleteOutlined />}>删除</Button>
             </div>}
        
         {hasChanged &&
             <div className="changed">
                 <Divider type="vertical" orientation="center" />
-                {!!adds.length && <span className="cg-tip">新增{adds.length}条</span>}
-                {!!modifies.length && <span className="cg-tip">修改{modifies.length}条</span>}
-                {!!dels.length && <span className="cg-tip">删除{dels.length}条</span>}
-                <Button type="link" onClick={onSave} icon={<CloudUploadOutlined />}>保存</Button>
-                <Button type="link" onClick={onCancel} icon={<RedoOutlined />}>撤销</Button>
+                {!!adds.length && <span className="cg-tip">新增[{adds.length}]</span>}
+                {!!modifies.length && <span className="cg-tip">修改[{modifies.length}]</span>}
+                {!!dels.length && <span className="cg-tip">删除[{dels.length}]</span>}
+                <Button type="link" onClick={onSave} icon={<ICON.CloudUploadOutlined />}>保存</Button>
+                <Button type="link" onClick={onCancel} icon={<ICON.RedoOutlined />}>撤销</Button>
             </div>}
     </Div>
 }
@@ -61,6 +76,7 @@ export const StatusBar = () => {
 const Div = styled.div`
     display: flex;
     align-items: center;
+    padding: 0 12px;
     .display-columns {
         padding-right: 0;
     }

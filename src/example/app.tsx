@@ -8,7 +8,7 @@ const columns: IColumn[] =[
     {
         title: "姓名", 
         dataIndex: "name",
-        width: "200px",
+        width: 200,
         editable: {
             widget: "select",
             placeholder: "请选择姓名",
@@ -18,15 +18,29 @@ const columns: IColumn[] =[
                 {label: "小王", value: "小王"},
             ],
         },
+        filters: [
+            {
+                text: '小明',
+                value: "小明",
+            },
+            {
+                text: '小王',
+                value: "小王",
+            },
+        ],
+        onFilter: (value, record) => {
+            return record.name === value;
+        },
+        sorter: (a, b) => a.age - b.age,
     },
     {
         title: "年龄", 
         dataIndex: "age",
-        width: "200px",
+        width: 200,
         editable: {
             widget: "number",
             placeholder: "请输入年龄",
-        }
+        },
     },
     {
         title: "出生日期", 
@@ -38,34 +52,35 @@ const columns: IColumn[] =[
     },
     {
         title: "操作",
+        fixed: "right",
+        width: 200,
         buttons: [
             {
                 text: "复制",
+                tooltip: "复制",
                 onClick: function(this: TableModel, record: IRecordMD) {
                     this.copy(record);
                 }
             },
-            "",
+            {
+                type: "divider",
+            },
             {
                 text: "删除",
+                tooltip: "删除",
+                disabled: (record: any) => true,
+                visible: (record: any) => true,
                 onClick: function(this: TableModel, record: IRecordMD) {
                     this.delete(record);
                 }
             },
-            "",
             {
                 text: "更多",
                 children: [
-                    {
-                        text: "编辑",
-                    },
-                    {
-                        text: "查看",
-                    },
-                    "",
-                    {
-                        text: "审核",
-                    },
+                    {text: "编辑"},
+                    {text: "查看"},
+                    {type: "divider"},
+                    {text: "审核"},
                 ]
             }
         ]
@@ -93,7 +108,7 @@ const data = [
 ]
 
 function App() {
-    return <ST columns={columns} data={data} />
+    return <ST columns={columns} data={data} statusBar={{excludeColumns: ["年龄"]}} />
 }
 
 export default App;

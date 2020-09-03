@@ -25,7 +25,10 @@ export class TableModel {
     private _selectedRows: number[] = [];
 
     constructor(props: ISTProps, update?: () => void) {
-        const { data, columns } = props;
+        const { data, columns, statusBar } = props;
+        const includeColumns = statusBar?.includeColumns;
+        const excludeColumns = statusBar?.excludeColumns;
+
         data?.forEach((e, idx) => {
             e.$$id = idx;
         })
@@ -34,7 +37,20 @@ export class TableModel {
         });
 
         this._allColumns = columns || [] as any;
-        this._displayColumns = this._allColumns.map(e => e.$$id);
+        if(includeColumns) {
+            this._displayColumns = this._allColumns
+                .filter(e => includeColumns?.includes(e.title as string))
+                .map(e => e.$$id);
+        } 
+        else if(excludeColumns) {
+            this._displayColumns = this._allColumns
+                .filter(e => !excludeColumns?.includes(e.title as string))
+                .map(e => e.$$id);
+        }
+        else {
+            this._displayColumns = this._allColumns
+                .map(e => e.$$id);
+        }
         this._data = data || [] as any;
         this._maxId = this._data.length;
         if(update) {
@@ -61,7 +77,7 @@ export class TableModel {
         idx < 0 ?
             this._displayColumns.push(item): 
             this._displayColumns.splice(idx, 1);
-        this._debounceUpdate();
+        this._update();
     }
 
     public edit(record: IRecordMD, dataIndex: string, val: any) {
@@ -115,7 +131,7 @@ export class TableModel {
         };
         this._changed.push(nRec);
         this._maxId ++;
-        this._debounceUpdate();
+        this._update();
     }
 
     public copy(record: IRecordMD) {
@@ -126,7 +142,7 @@ export class TableModel {
         });
         this._changed.push(nRec);
         this._maxId ++;
-        this._debounceUpdate();
+        this._update();
     }
 
     public get changedInfo() {
@@ -173,9 +189,15 @@ export class TableModel {
         return [...this._selectedRows];
     }
 
+    get selectedRecords() {
+        const selected = this.selectedRows;
+        const data = this.mergedData;
+        return data.filter(e => selected.includes(e.$$id));
+    }
+
     public setSelectedRows(rows: number[]) {
         this._selectedRows = rows || [];
-        this._debounceUpdate();
+        this._update();
     }
 
     private _update() {}
