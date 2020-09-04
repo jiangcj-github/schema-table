@@ -1,29 +1,50 @@
 {
     "name": "schema-table",
     "version": "0.1.0",
-    "private": true,
+    "private": false,
+    "files": [
+        "dist",
+        "lib"
+    ],
+    "keywords": [
+        "react",
+        "react-component",
+        "json-table"
+    ],
+    "main": "./lib/index",
+    "types": "./lib/index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "http://newgit.op.ksyun.com/CDN-CENTER-FE/schema-table"
+    },
     "dependencies": {
+        "classnames": "^2.2.6",
+        "lodash": "^4.17.20",
+        "pinyin-match": "^1.1.1",
+        "styled-components": "^5.1.1",
+        "xlsx": "^0.16.6"
+    },
+    "devDependencies": {
         "@ant-design/icons": "^4.2.2",
+        "@babel/cli": "^7.11.6",
+        "@babel/core": "^7.11.6",
+        "@babel/preset-env": "^7.11.5",
+        "@babel/preset-react": "^7.10.4",
         "@types/classnames": "^2.2.10",
         "@types/lodash": "^4.14.161",
         "@types/react": "^16.9.0",
         "@types/react-dom": "^16.9.0",
         "@types/styled-components": "^5.1.2",
-        "classnames": "^2.2.6",
-        "lodash": "^4.17.20",
+        "antd": "^4.6.1",
         "react": "^16.13.1",
         "react-dom": "^16.13.1",
         "react-scripts": "3.4.3",
-        "styled-components": "^5.1.1",
-        "typescript": "~3.7.2",
-        "xlsx": "^0.16.6"
-    },
-    "devDependencies": {
-        "antd": "^4.6.1",
-        "ks-schema-form": "^1.0.6"
+        "typescript": "3.8.x",
+        "webpack-cli": "^3.3.12"
     },
     "scripts": {
-        "start": "react-scripts start"
+        "start": "react-scripts start",
+        "build": "sh publish.sh"
     },
     "eslintConfig": {
         "extends": "react-app"

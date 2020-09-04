@@ -16,6 +16,9 @@ export const EditCell = (props: IEditCellProps) => {
 
     const tableModel = React.useContext(TableContext);
     const { col, record } = props;
+    const editable = typeof(col.editable) === "function" ? 
+        col.editable.call(tableModel, record) : 
+        col.editable;
 
     const [inEdit, setInEdit] = React.useState(false);
 
@@ -34,7 +37,7 @@ export const EditCell = (props: IEditCellProps) => {
         document.body.style.removeProperty("overflow");
     }
 
-    const Widget = widgetRegistry.get(col.editable?.widget || "");
+    const Widget = widgetRegistry.get(editable?.widget || "");
 
     return (
         <Div>
@@ -42,7 +45,7 @@ export const EditCell = (props: IEditCellProps) => {
             <div className="cell" onClick={onFocus} >
                 {inEdit ? 
                     <Widget 
-                        ui={col.editable} 
+                        ui={editable} 
                         dataIndex={col.dataIndex} 
                         value={_.get(record, col.dataIndex as string)}
                         record={record} 
@@ -76,5 +79,6 @@ const Div = styled.div`
     }
     .cell-input {
         width: 100%;
+        max-width: 200px;
     }
 `

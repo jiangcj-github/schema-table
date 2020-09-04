@@ -1,9 +1,7 @@
 import React from 'react';
-import { ST } from "../lib/st";
 import 'antd/dist/antd.css';
-import {IColumn} from '../lib/tools';
-import { TableModel, IRecordMD } from './../lib/model';
 import {PlusCircleOutlined} from '@ant-design/icons';
+import {IColumn, TableModel, IRecordMD, ST} from '../lib';
 
 const columns: IColumn[] =[
     {
@@ -38,10 +36,16 @@ const columns: IColumn[] =[
         title: "年龄", 
         dataIndex: "age",
         width: 200,
+        editable: {
+            widget: "switch"
+        }
     },
     {
         title: "出生日期", 
         dataIndex: "birth",
+        editable: {
+            widget: "datepicker",
+        }
     },
     {
         title: "操作",
@@ -105,8 +109,6 @@ const data = [
 function App() {
     return <ST columns={columns} data={data} 
         statusBar={{
-            excludeColumns: ["年龄"], 
-            hideAdjustColumns: true,
             buttons: [
                 {text: "报警", onClick: function(){},  icon: <PlusCircleOutlined />,},
                 {text: "邮件", onClick: function(){}},

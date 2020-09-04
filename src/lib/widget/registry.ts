@@ -1,13 +1,16 @@
+import {IRecordMD, TableModel} from '../model';
+import {IColumnEdit} from '../tools';
+
 import { InputWidget } from './input';
 import { SelectWidget } from './select';
 import { NumberWidget } from './number';
-import {IColumnEdit} from '../tools';
-import {IRecordMD, TableModel} from '../model';
+import { SwitchWidget } from './switch';
+import { DatePickerWidget } from './datepicker';
 
-export interface IWidgetProps {
-    ui: IColumnEdit;
+export interface IWidgetProps<V, T extends IColumnEdit = IColumnEdit> {
+    ui: T;
     dataIndex: string;
-    value: any;
+    value: V;
     record: IRecordMD;
     tableModel: TableModel;
 }
@@ -19,7 +22,6 @@ interface WidgetMap {
 }
 
 class WidgetRegistry {
-
     private _map: WidgetMap = [] as any;
     private _default!: IWidget;
 
@@ -34,7 +36,6 @@ class WidgetRegistry {
     public get(name: string) {
         return this._map[name] || this._default;
     }
-
 }
 
 export const widgetRegistry = new WidgetRegistry();
@@ -42,4 +43,6 @@ export const widgetRegistry = new WidgetRegistry();
 widgetRegistry.registry("input", InputWidget);
 widgetRegistry.registry("select", SelectWidget);
 widgetRegistry.registry("number", NumberWidget);
+widgetRegistry.registry("switch", SwitchWidget);
+widgetRegistry.registry("datepicker", DatePickerWidget);
 widgetRegistry.setDefault(InputWidget);

@@ -1,6 +1,6 @@
 import _ from "lodash";
 import {ISTProps, IColumn, IRecord} from "./tools";
-import exportXlxs from "./export";
+import {exportExcel} from "./xlsx";
 
 export type IColumnMD = IColumn & {
     $$id: number
@@ -228,7 +228,7 @@ export class TableModel {
                 });
             }, {})
         });
-        exportXlxs(initColumn, attendanceInfoList, name)
+        exportExcel(initColumn, attendanceInfoList, name)
     }
 
     public get pageInfo() {

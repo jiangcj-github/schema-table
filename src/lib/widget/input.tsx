@@ -1,23 +1,23 @@
-import React, {ChangeEvent} from "react";
+import React from "react";
 import {Input} from "antd";
 import {IWidgetProps} from "./registry";
 
-export const InputWidget = (props: IWidgetProps) => {
-
+export const InputWidget = (props: IWidgetProps<string>) => {
     const {ui, record, dataIndex, tableModel, value} = props;
    
-    const onChange = (e: ChangeEvent) => {
-        const value = (e.target as any).value;
+    const onChange = (e: any) => {
+        const value = e.target.value;
         tableModel.edit(record, dataIndex, value);
     }
-
+    
     return (
         <Input 
+            {...ui}
             className="cell-input"
-            placeholder={ui.placeholder}
             value={value}
             onChange={onChange}
             autoFocus={true}
+            allowClear={ui.allowClear ?? true}
         />
     )
 }

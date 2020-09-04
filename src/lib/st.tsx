@@ -130,7 +130,7 @@ export class ST extends React.Component<ISTProps> {
             const nCol = _.cloneDeep(col);
             if(col.editable && col.dataIndex) {
                 Object.assign(nCol, {
-                    render: (...params: [any, IRecordMD, number]) => this.renderEditable(col, ...params),
+                    render: (_: any, record: IRecordMD, index: number) => this.renderEditable(col, _, record, index),
                 })
             }
             if(col.buttons) {

@@ -1,8 +1,7 @@
-import React, {ReactNode} from "react";
-import {ColumnGroupType, ColumnType} from "antd/lib/table";
-import {TableModel, IRecordMD} from "./model";
-import {TableRowSelection, TablePaginationConfig} from "antd/lib/table/interface";
-
+import React, { ReactNode } from "react";
+import { ColumnGroupType, ColumnType } from "antd/lib/table";
+import { TableModel, IRecordMD } from "./model";
+import { TableRowSelection, TablePaginationConfig } from "antd/lib/table/interface";
 export interface IColumnOp {
     text?: string;
     icon?: ReactNode;
@@ -14,22 +13,18 @@ export interface IColumnOp {
     children?: IColumnOp[];
     [key: string]: any;
 }
-
 export interface IColumnEdit {
     widget: string;
     [key: string]: any;
 }
-
-export type IColumn = (ColumnGroupType<any> | ColumnType<any>) & {
+export declare type IColumn = (ColumnGroupType<any> | ColumnType<any>) & {
     dataIndex?: string;
     editable?: IColumnEdit | ((record: IRecordMD) => IColumnEdit);
     buttons?: IColumnOp[];
-}
-
+};
 export interface IRecord {
     [key: string]: any;
 }
-
 export interface IStatusBar {
     onSave?: (records: IRecord) => void | false;
     onAdd?: () => void | false;
@@ -45,7 +40,6 @@ export interface IStatusBar {
         onClick?: () => void;
     }[];
 }
-
 export interface ISTProps {
     data?: IRecord[];
     columns?: IColumn[];
@@ -57,5 +51,4 @@ export interface ISTProps {
     pagination?: TablePaginationConfig;
     [key: string]: any;
 }
-
-export const TableContext = React.createContext(new TableModel({}));
+export declare const TableContext: React.Context<TableModel>;

@@ -1,18 +1,17 @@
 import React from "react";
-import {InputNumber} from "antd";
+import {Switch} from "antd";
 import {IWidgetProps} from "./registry";
 
-export const NumberWidget = (props: IWidgetProps<number>) => {
+export const SwitchWidget = (props: IWidgetProps<boolean>) => {
     const {ui, record, dataIndex, tableModel, value} = props;
     
-    const onChange = (val?: number | string) => {
+    const onChange = (val: boolean) => {
         tableModel.edit(record, dataIndex, val);
     }
     return (
-        <InputNumber 
+        <Switch 
             {...ui}
-            className="cell-input"
-            value={value}
+            checked={value}
             onChange={onChange}
             autoFocus={true}
         />

@@ -1,7 +1,7 @@
 
 import XLSX from 'xlsx';
 
-function exportExcel(headers, data, fileName = "file") {
+export function exportExcel(headers, data, fileName = "file") {
     const _headers = headers
         .map((item, i) => Object.assign({}, { key: item.key, title: item.title, position: String.fromCharCode(65 + i) + 1 }))
         .reduce((prev, next) => Object.assign({}, prev, { [next.position]: { key: next.key, v: next.title } }), {});
@@ -38,5 +38,3 @@ function exportExcel(headers, data, fileName = "file") {
     // 导出 Excel
     XLSX.writeFile(wb, fileName + ".xlsx");
 }
-
-export default exportExcel;
