@@ -3,8 +3,8 @@ import styled from "styled-components";
 import cln from "classnames";
 import { widgetRegistry } from './widget/registry';
 import _ from "lodash";
-import {IColumnMD, IRecordMD} from "./model";
-import { TableContext } from './tools';
+import {IColumnMD, IRecordMD} from "../model";
+import { TableContext } from '../tools';
 
 interface IEditCellProps {
     col: IColumnMD;
@@ -16,16 +16,11 @@ export const EditCell = (props: IEditCellProps) => {
 
     const tableModel = React.useContext(TableContext);
     const { col, record } = props;
-    const editable = typeof(col.editable) === "function" ? 
+    const editable: any = typeof(col.editable) === "function" ? 
         col.editable.call(tableModel, record) : 
         col.editable;
 
     const [inEdit, setInEdit] = React.useState(false);
-
-    React.useEffect(() => {
-        setInEdit(false);
-        document.body.style.removeProperty("overflow");
-    }, [tableModel.editId])
 
     const onFocus = () => {
         setInEdit(true);
@@ -35,9 +30,11 @@ export const EditCell = (props: IEditCellProps) => {
     const clickMask = () => {
         setInEdit(false);
         document.body.style.removeProperty("overflow");
+        editable.onSave?.call(tableModel, record, _.get(record, col.dataIndex as string));
     }
 
     const Widget = widgetRegistry.get(editable?.widget || "");
+    const {onSave, widget, ...restProps} = editable;
 
     return (
         <Div>
@@ -45,7 +42,7 @@ export const EditCell = (props: IEditCellProps) => {
             <div className="cell" onClick={onFocus} >
                 {inEdit ? 
                     <Widget 
-                        ui={editable} 
+                        ui={restProps} 
                         dataIndex={col.dataIndex} 
                         value={_.get(record, col.dataIndex as string)}
                         record={record} 
@@ -68,6 +65,7 @@ const Div = styled.div`
         &.active {
             position: fixed;
             z-index: 1000;
+            background: rgba(255, 255, 255, .3);
         }
         &.active + .cell {
             position: relative;

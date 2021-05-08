@@ -1,14 +1,15 @@
-import {IRecordMD, TableModel} from '../model';
-import {IColumnEdit} from '../tools';
+import {IRecordMD, TableModel} from '../../model';
+import {IColumnEditOpt} from '../../tools';
 
 import { InputWidget } from './input';
 import { SelectWidget } from './select';
 import { NumberWidget } from './number';
 import { SwitchWidget } from './switch';
 import { DatePickerWidget } from './datepicker';
+import { CheckBoxWidget } from './checkbox';
 
-export interface IWidgetProps<V, T extends IColumnEdit = IColumnEdit> {
-    ui: T;
+export interface IWidgetProps<V, T> {
+    ui: T & IColumnEditOpt;
     dataIndex: string;
     value: V;
     record: IRecordMD;
@@ -45,4 +46,5 @@ widgetRegistry.registry("select", SelectWidget);
 widgetRegistry.registry("number", NumberWidget);
 widgetRegistry.registry("switch", SwitchWidget);
 widgetRegistry.registry("datepicker", DatePickerWidget);
+widgetRegistry.registry("checkbox", CheckBoxWidget);
 widgetRegistry.setDefault(InputWidget);

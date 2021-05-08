@@ -2,9 +2,9 @@ import React from "react";
 import {Table, Button, Dropdown, Menu, Divider, Tooltip} from "antd";
 import { EditCell } from './edit-cell';
 import _ from "lodash";
-import {StatusBar} from "./status";
+import {StatusBar} from "./status-bar";
 import styled from "styled-components";
-import {ISTProps, TableContext, IColumnOp, IRecord} from "./tools";
+import {ISTProps, TableContext, IColumnButton, IRecord, IColumnMenuButton} from "./tools";
 import {IRecordMD, TableModel, IColumnMD} from "./model";
 import * as ICON from "@ant-design/icons";
 
@@ -48,11 +48,11 @@ export class ST extends React.Component<ISTProps> {
         )
     }
 
-    private renderButtonsOverlay = (children: IColumnOp[], record: IColumnMD) => {
+    private renderButtonsOverlay = (children: IColumnMenuButton[], record: IColumnMD) => {
         const { model: tableModel } = this.state;
         return (
             <OverlayMenu>
-                {children.map((child: IColumnOp, idx: number) => {
+                {children.map((child: IColumnMenuButton, idx: number) => {
                     const disabled = child.disabled?.call(tableModel, record) ?? false;
                     const visible = child.visible?.call(tableModel, record) ?? true;
                     if(!visible) {
@@ -77,14 +77,11 @@ export class ST extends React.Component<ISTProps> {
 
     private renderOperation = (col: IColumnMD, record: IRecordMD) => {
         const { model: tableModel } = this.state;
-        const btns = col.buttons?.map((button: IColumnOp, idx: number) => {
+        const btns = col.buttons?.map((button: IColumnButton, idx: number) => {
             const disabled = button.disabled?.call(tableModel, record) ?? false;
             const visible = button.visible?.call(tableModel, record) ?? true;
             if(!visible) {
                 return null;
-            }
-            if(button.type === "divider") {
-                return <Divider key={idx} type="vertical" orientation="center"/>
             }
             if(button.children) {
                 return (
@@ -117,8 +114,15 @@ export class ST extends React.Component<ISTProps> {
                 )
             }
             return btn;
-        });
-        return <OperationWrap>{btns}</OperationWrap>
+        }) ?? [];
+        const dividerBtns = [];
+        for(let i=0; i<btns.length; i++) {
+            dividerBtns.push(btns[i]);
+            if(i < btns.length-1) {
+                dividerBtns.push(<Divider key={`divider_${i}`} type="vertical" orientation="center"/>)
+            }
+        }
+        return <OperationWrap>{dividerBtns}</OperationWrap>
     }
 
     public render() {
@@ -158,23 +162,7 @@ export class ST extends React.Component<ISTProps> {
                 showQuickJumper: true,
                 showSizeChanger: true,
                 showTotal: (total: number) => <span>共{total}条</span>,
-                ...tableModel.pageInfo,
                 ...this.props.pagination,
-                onChange: (current: number) => {
-                    if(!this.props.pagination?.hasOwnProperty("current")) {
-                        tableModel.setPage(current);
-                    }
-                    this.props.pagination?.onChange?.call(tableModel, current);
-                },
-                onShowSizeChange: (current: number, size: number) => {
-                    if(!this.props.pagination?.hasOwnProperty("current")) {
-                        tableModel.setPage(current);
-                    }
-                    if(!this.props.pagination?.hasOwnProperty("pageSize")) {
-                        tableModel.setPageSize(size);
-                    }
-                    this.props.pagination?.onShowSizeChange?.call(tableModel, current, size);
-                }
             }
         }
 
@@ -211,11 +199,8 @@ const OperationWrap = styled.span`
     }
 `
 
-const OverlayMenu = styled(Menu) `
-    min-width: 100px;
-    .ant-dropdown-menu-item {
-        text-align: center;
-    }
+export const OverlayMenu = styled(Menu) `
+    min-width: 80px;
 `
 
 const StyleTable = styled(Table)`

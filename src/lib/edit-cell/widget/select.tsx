@@ -2,6 +2,7 @@ import React from "react";
 import {Select} from "antd";
 import {IWidgetProps} from "./registry";
 import { match } from "pinyin-match";
+import { SelectProps } from "antd/lib/select";
 
 interface IOption {
     label: string;
@@ -9,11 +10,12 @@ interface IOption {
     key?: number;
 }
 
-export const SelectWidget = (props: IWidgetProps<any>) => {
+export const SelectWidget = (props: IWidgetProps<any, SelectProps<any>>) => {
     const {ui, record, dataIndex, tableModel, value} = props;
     
     const onChange = (val: any) => {
         tableModel.edit(record, dataIndex, val);
+        ui.onChange?.call(tableModel, record, val);
     }
 
     const filterOption = (input: string, option: IOption) => {
@@ -22,7 +24,7 @@ export const SelectWidget = (props: IWidgetProps<any>) => {
     }
 
     const options = ui?.options ?? [];
-    options.forEach((e: IOption, idx: number) => {
+    options.forEach((e: any, idx: number) => {
         e.key = idx;
     });
 

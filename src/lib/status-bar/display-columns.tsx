@@ -1,6 +1,7 @@
 import React from "react";
 import {Checkbox, Dropdown, Button, Menu} from "antd";
-import {TableContext} from "./tools";
+import {TableContext} from "../tools";
+import { TableOutlined } from "@ant-design/icons";
 
 export const DisplayColumns = () => {
 
@@ -30,7 +31,7 @@ export const DisplayColumns = () => {
             onVisibleChange={b => setVisible(b)}
             visible={visible}
             overlay={DropdownOverlay}>
-            <Button type="link">选择显示列</Button>
+            <Button type="link" icon={<TableOutlined />}>选择列</Button>
         </Dropdown>
     )
 }

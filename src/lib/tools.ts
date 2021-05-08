@@ -3,47 +3,57 @@ import {ColumnGroupType, ColumnType} from "antd/lib/table";
 import {TableModel, IRecordMD} from "./model";
 import {TableRowSelection, TablePaginationConfig} from "antd/lib/table/interface";
 
-export interface IColumnOp {
+export interface IColumnButton {
     text?: string;
     icon?: ReactNode;
-    type?: "divider";
     tooltip?: string;
     disabled?: (record: IRecordMD) => boolean;
     visible?: (record: IRecordMD) => boolean;
     onClick?: (record: IRecordMD) => void;
-    children?: IColumnOp[];
-    [key: string]: any;
+    children?: IColumnMenuButton[];
 }
 
-export interface IColumnEdit {
+export interface IColumnMenuButton extends IColumnButton {
+    type?: "divider";
+}
+
+export interface IColumnEditOpt {
     widget: string;
+    onSave?: (record: IRecordMD, value: any) => void;
+    onChange?: (record: IRecordMD, value: any) => void;
     [key: string]: any;
 }
+export type IColumnEdit = false | IColumnEditOpt | ((record: IRecordMD) => IColumnEditOpt | false);
 
 export type IColumn = (ColumnGroupType<any> | ColumnType<any>) & {
     dataIndex?: string;
-    editable?: IColumnEdit | ((record: IRecordMD) => IColumnEdit);
-    buttons?: IColumnOp[];
+    editable?: IColumnEdit;
+    buttons?: IColumnButton[];
 }
 
 export interface IRecord {
     [key: string]: any;
 }
 
+export interface IStatusButton {
+    text?: string;
+    icon?: ReactNode;
+    tooltip?: string;
+    disabled?: (selectedRecords: IRecordMD[]) => boolean;
+    visible?: (selectedRecords: IRecordMD[]) => boolean;
+    onClick?: (selectedRecords: IRecordMD[]) => void;
+    children?: IStatusMenuButton[];
+}
+
+export interface IStatusMenuButton extends IStatusButton {
+    type?: "divider";
+}
+
 export interface IStatusBar {
-    onSave?: (records: IRecord) => void | false;
-    onAdd?: () => void | false;
-    onCancel?: (changedRecords: IRecord[]) => void | false;
-    onDelete?: (selectedRecords: IRecord[]) => void | false;
-    onExport?: (records: IRecord[]) => void | false;
-    includeColumns?: string[];
-    excludeColumns?: string[];
-    hideAdjustColumns?: boolean;
-    buttons?: {
-        text?: string;
-        icon?: ReactNode;
-        onClick?: () => void;
-    }[];
+    defaultDisplayColumns?: string[];
+    hideDisplayColumns?: boolean;
+    hideExport?: boolean;
+    buttons?: IStatusButton[];
 }
 
 export interface ISTProps {

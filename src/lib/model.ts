@@ -16,22 +16,15 @@ export class TableModel {
 
     private _data: IRecordMD[] = [];
     private _changed: IRecordMD[] = [];
-    private _maxId = 0;
-    private _editId = 0;
 
     private _allColumns: IColumnMD[] = [];
     private _displayColumns: number[] = [];
 
     private _selectedRows: number[] = [];
 
-    private _page = 1;
-    private _pageSize = 10;
-    private _total = 0;
-
     constructor(props: ISTProps, update?: () => void) {
-        const { data, columns, statusBar, pagination } = props;
-        const includeColumns = statusBar?.includeColumns;
-        const excludeColumns = statusBar?.excludeColumns;
+        const { data, columns, statusBar } = props;
+        const displayColumns = statusBar?.defaultDisplayColumns;
 
         data?.forEach((e, idx) => {
             e.$$id = idx;
@@ -41,29 +34,22 @@ export class TableModel {
         });
 
         this._allColumns = columns || [] as any;
-        if(includeColumns) {
+        if(displayColumns) {
             this._displayColumns = this._allColumns
-                .filter(e => includeColumns?.includes(e.title as string))
+                .filter(e => displayColumns?.includes(e.title as string))
                 .map(e => e.$$id);
         } 
-        else if(excludeColumns) {
-            this._displayColumns = this._allColumns
-                .filter(e => !excludeColumns?.includes(e.title as string))
-                .map(e => e.$$id);
-        }
         else {
             this._displayColumns = this._allColumns
                 .map(e => e.$$id);
         }
+        
         this._data = data || [] as any;
-        this._maxId = this._data.length;
+
         if(update) {
             this._update = update;
             this._debounceUpdate = _.debounce(update, 1000 / 30);
         }
-        this._total = data?.length ?? 0;
-        this._pageSize = pagination?.defaultPageSize ?? 10;
-        this._page = pagination?.defaultCurrent ?? 1;
     }
 
     get displayColumns() {
@@ -74,83 +60,8 @@ export class TableModel {
         return this._allColumns;
     }
 
-    public toggleDisplay(item: number) {
-        const idx = this._displayColumns.findIndex(e => e === item);
-        idx < 0 ?
-            this._displayColumns.push(item): 
-            this._displayColumns.splice(idx, 1);
-        this._update();
-    }
-
-    public edit(record: IRecordMD, dataIndex: string, val: any) {
-        if(record.$$mode === "modify") {
-            _.set(record, dataIndex, val);
-            _.isMatch(record, record.$$origin as IRecordMD) && _.pull(this._changed, record);
-        }
-        else if(record.$$mode) {
-            _.set(record, dataIndex, val);
-        }
-        else {
-            const nRec = Object.assign(_.cloneDeep(record), {
-                $$mode: "modify",
-                $$origin: record,
-            });
-            _.set(nRec, dataIndex, val);
-            this._changed.push(nRec);
-        }
-        this._debounceUpdate();
-    }
-
-    public delete(record: IRecordMD) {
-        if(record.$$mode === "add") {
-            _.pull(this._changed, record);
-        }
-        else if(record.$$mode) {
-            record.$$mode = "delete";
-        }
-        else {
-            const nRec = _.cloneDeep(record);
-            nRec.$$mode = "delete";
-            this._changed.push(nRec);
-        }
-        this._selectedRows.includes(record.$$id) && _.pull(this._selectedRows, record.$$id);
-        this._total --;
-        this._recalculatePage();
-        this._debounceUpdate();
-    }
-
-    public deleteSelection() {
-        const data = this.mergedData;
-        const selected = this.selectedRows;
-        selected.forEach(id => {
-            const record = data.find(e => e.$$id === id);
-            record && this.delete(record);
-        });
-    }
-
-    public add() {
-        const nRec = {
-            $$id: this._maxId + 1,
-            $$mode: "add"
-        };
-        this._changed.unshift(nRec);
-        this._maxId ++;
-        this._total ++;
-        this._page = 1;
-        this._update();
-    }
-
-    public copy(record: IRecordMD) {
-        const nRec = Object.assign(_.cloneDeep(record), {
-            $$id: this._maxId + 1,
-            $$mode: "add",
-            $$origin: undefined,
-        });
-        this._changed.unshift(nRec);
-        this._maxId ++;
-        this._total ++;
-        this._page = 1;
-        this._update();
+    get data() {
+        return this._data;
     }
 
     public get changedInfo() {
@@ -169,20 +80,28 @@ export class TableModel {
             .value();
     }
 
-    get changed() {
-        return this._changed;
-    }
-
-    public resetEdit() {
-        this._changed = [];
-        this._editId = Math.random();
-        this._page = 1;
-        this._total = this._data.length;
+    public toggleDisplay(item: number) {
+        const idx = this._displayColumns.findIndex(e => e === item);
+        idx < 0 ?
+            this._displayColumns.push(item): 
+            this._displayColumns.splice(idx, 1);
         this._update();
     }
 
-    public get editId() {
-        return this._editId;
+    public edit(record: IRecordMD, dataIndex: string, val: any) {
+        if(record.$$mode === "modify") {
+            _.set(record, dataIndex, val);
+            _.isMatch(record, record.$$origin as IRecordMD) && _.pull(this._changed, record);
+        }
+        else {
+            const nRec = Object.assign(_.cloneDeep(record), {
+                $$mode: "modify",
+                $$origin: record,
+            });
+            _.set(nRec, dataIndex, val);
+            this._changed.push(nRec);
+        }
+        this._debounceUpdate();
     }
 
     public isChanged(record: IRecordMD, dataIndex: string) {
@@ -201,7 +120,7 @@ export class TableModel {
 
     get selectedRecords() {
         const selected = this.selectedRows;
-        const data = this.mergedData;
+        const data = this._data;
         return data.filter(e => selected.includes(e.$$id));
     }
 
@@ -229,37 +148,6 @@ export class TableModel {
             }, {})
         });
         exportExcel(initColumn, attendanceInfoList, name)
-    }
-
-    public get pageInfo() {
-        return {
-            current: this._page,
-            pageSize: this._pageSize,
-            total: this._total
-        }
-    }
-
-    public setPage(page: number) {
-        if(page > 0) {
-            this._page = page;
-        }
-        else if(page < 0) {
-            const maxPage = Math.ceil(this._total / this._pageSize);
-            this._page = maxPage + page + 1;
-        }
-        this._update();
-    }
-
-    public setPageSize(pageSize: number) {
-        if(pageSize > 0) {
-            this._pageSize = pageSize;
-        }
-        this._update();
-    }
-
-    private _recalculatePage() {
-        this._total <= (this._page - 1) * this._pageSize && this._page --;
-        this._page <= 1 && (this._page = 1);
     }
 
 }

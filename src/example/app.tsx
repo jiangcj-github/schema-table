@@ -8,14 +8,19 @@ const columns: IColumn[] =[
         title: "姓名", 
         dataIndex: "name",
         width: 200,
-        editable: {
-            widget: "select",
-            placeholder: "请选择姓名",
-            options: [
-                {label: "小明", value: "小明"},
-                {label: "小红", value: "小红"},
-                {label: "小王", value: "小王"},
-            ],
+        editable: (record) => {
+            return {
+                widget: "select",
+                placeholder: "请选择姓名",
+                options: [
+                    {label: "小明", value: "小明"},
+                    {label: "小红", value: "小红"},
+                    {label: "小王", value: "小王"},
+                ],
+                onChange: (record: any, value: any) => {
+                    console.log(record, value);
+                }
+            }
         },
         filters: [
             {
@@ -37,7 +42,10 @@ const columns: IColumn[] =[
         dataIndex: "age",
         width: 200,
         editable: {
-            widget: "switch"
+            widget: "input",
+            onSave: function(this: any, record, value) {
+                console.log(this, value, record)
+            }
         }
     },
     {
@@ -57,21 +65,15 @@ const columns: IColumn[] =[
                 tooltip: "复制",
                 icon: <i />,
                 onClick: function(this: TableModel, record: IRecordMD) {
-                    this.copy(record);
+                   
                 }
-            },
-            {
-                type: "divider",
             },
             {
                 text: "删除",
                 tooltip: "删除",
                 onClick: function(this: TableModel, record: IRecordMD) {
-                    this.delete(record);
+                    
                 }
-            },
-            {
-                type: "divider",
             },
             {
                 text: "更多",
@@ -107,12 +109,29 @@ const data = [
 ]
 
 function App() {
+    console.log("render app");
     return <ST columns={columns} data={data} 
         statusBar={{
             buttons: [
-                {text: "报警", onClick: function(){},  icon: <PlusCircleOutlined />,},
+                {
+                    text: "报警", 
+                    onClick: function(){},  
+                    icon: <PlusCircleOutlined />,
+                    disabled: (selectedRecord: any) => selectedRecord.length,
+                },
                 {text: "邮件", onClick: function(){}},
                 {text: "发送", onClick: function(){}},
+                {
+                    text: "更多",
+                    children: [
+                        {text: "编辑", onClick: function(...params) {
+                            console.log(params);
+                        }},
+                        {text: "查看"},
+                        {type: "divider"},
+                        {text: "审核"},
+                    ]
+                }
             ]
         }} />
 }
